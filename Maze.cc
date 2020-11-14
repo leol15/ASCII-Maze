@@ -1,12 +1,16 @@
 
+#include "Maze.h"
+
 #include <vector>
 #include <iostream>
 #include <string>
 #include <unistd.h> 	// for timer
 #include <stdlib.h> 	/* srand, rand */
 #include <time.h>       /* time */
-#include "Maze.h"
+#include <stack>
 
+
+// local helper
 static char** init_grid(dim w, dim h, char c) {
 	char ** tmp = new char*[h];
 	for (dim i = 0; i < h; i++) {
@@ -18,7 +22,7 @@ static char** init_grid(dim w, dim h, char c) {
 	return tmp;
 }
 
-// default
+// default ctor
 Maze::Maze() : w_(11), h_(10), x_(0), y_(1) {
 	std::string map[] = {"# #########",
 						 "#     ## ##",
@@ -38,9 +42,8 @@ Maze::Maze() : w_(11), h_(10), x_(0), y_(1) {
 	}
 }
 
-Maze::Maze(int width, int height) : w_(width), h_(height), x_(2), y_(1) {
+Maze::Maze(int width, int height) : w_(width), h_(height), x_(0), y_(0) {
 	grid_ = init_grid(w_, h_, ' ');
-	CreateMaze();
 }
 
 Maze::~Maze() {
@@ -48,6 +51,14 @@ Maze::~Maze() {
 		delete[] grid_[i];
 	}
 	delete[] grid_;
+}
+
+
+void Maze::Recreate() {
+	for (dim i = 0; i < h_; i++)
+		for (dim j = 0; j < w_; j++)
+			grid_[i][j] = ' ';
+	CreateMaze_Div();
 }
 
 std::ostream &operator<<(std::ostream &out, const Maze &m) {
@@ -66,45 +77,63 @@ std::ostream &operator<<(std::ostream &out, const Maze &m) {
 }
 
 // actions 
-
 void Maze::MoveUp() {
-	if (!isGood(x_ - 1, y_))
+	if (!isGood(x_ - 1, y_, ' '))
 		return;
 	x_--;
 }
 void Maze::MoveDown() {
-	if (!isGood(x_ + 1, y_))
+	if (!isGood(x_ + 1, y_, ' '))
 		return;
 	x_++;
 }
 void Maze::MoveLeft() {
-	if (!isGood(x_, y_ - 1))
+	if (!isGood(x_, y_ - 1, ' '))
 		return;
 	y_--;
 }
 void Maze::MoveRight() {
-	if (!isGood(x_, y_ + 1))
+	if (!isGood(x_, y_ + 1, ' '))
 		return;
 	y_++;
 }
 
-bool Maze::isGood(dim x, dim y) {
+bool Maze::isGood(dim x, dim y, char goal) {
 	return x >= 0 && x < h_ && y >= 0 && y < w_
-		&& grid_[x][y] == ' ';
+		&& grid_[x][y] == goal;
 }
 
 
-// helper
+// Maze Implementations
+
+// divde & conquer
+void Maze::CreateMaze_Div() {
+	for (dim i = 0; i < h_; i++) {
+		grid_[i][0] = '#';
+		grid_[i][w_ - 1] = '#';
+	}
+	for (dim i = 0; i < w_; i++) {
+		grid_[0][i] = '#';
+		grid_[h_ - 1][i] = '#';
+	}
+	x_ = 0;
+	y_ = 1;
+	grid_[0][1] = ' ';
+	grid_[h_ - 1][w_ - 2] = ' ';
+
+	// recursive process
+	srand(time(NULL));
+	CreateMaze_Div_Helper(1, 1, w_ - 2,  h_ - 2, 49);
+}
+
 // (x,y) ~ (x+w,y+h) are all empty
-void Maze::CreateMazeHelper(dim x, dim y, dim w, dim h, dim depth) {
+void Maze::CreateMaze_Div_Helper(dim x, dim y, dim w, dim h, dim depth) {
 	// base case
-	if (w <= 2 || h <= 2 || w > 100 || h > 100)
+	if (w <= 2 || h <= 2 || w > 200 || h > 200)
 		return;
 	// decision
-	dim div_x = x + h / 2;
-	dim div_y = y + w / 2;
+	dim div_x, div_y;
 	int ctr = 0;
-
 	while (true) {
 		// random location
 		div_x = x + 1 + rand() % (h - 2);
@@ -114,7 +143,6 @@ void Maze::CreateMazeHelper(dim x, dim y, dim w, dim h, dim depth) {
 			grid_[div_x][y + w] == ' ' ||
 			grid_[x - 1][div_y] == ' ' ||
 			grid_[x + h][div_y] == ' ') {
-			ctr++;
 		} else {
 			break;
 		}
@@ -123,19 +151,20 @@ void Maze::CreateMazeHelper(dim x, dim y, dim w, dim h, dim depth) {
 			ctr = -1;
 			break;
 		}
+		ctr++;
 	}
 
 	// build walls
 	for (dim i = 0; i < w; i++) {
-		grid_[div_x][y + i] = '#';
+		grid_[div_x][y + i] = (char) depth;
 	}
 	for (dim i = 0; i < h; i++) {
-		grid_[x + i][div_y] = '#';
+		grid_[x + i][div_y] = (char) depth;
 	}
 
 	// make holes for parent
 	if (ctr == -1) {
-		std::cout << "More holes: " << div_x  << ", " << div_y << std::endl;
+		// std::cout << "More holes: " << div_x  << ", " << div_y << std::endl;
 		if (grid_[div_x][y - 1] == ' ')
 			grid_[div_x][y] = ' ';
 		if (grid_[div_x][y + w] == ' ')
@@ -157,47 +186,87 @@ void Maze::CreateMazeHelper(dim x, dim y, dim w, dim h, dim depth) {
 	grid_[div_x][y + (rand() % w1)] = ' ';
 	grid_[x + rand() % h1][div_y] = ' ';
 
+	// animation
 	std::cout << "\x1B[2J\x1B[H";
 	std::cout << *this;
 	usleep(100000);
 	// recurse
-	CreateMazeHelper(x,         y,         w1, h1, depth + 1);
-	CreateMazeHelper(x,         div_y + 1, w2, h1, depth + 1);
-	CreateMazeHelper(div_x + 1, y,         w1, h2, depth + 1);
-	CreateMazeHelper(div_x + 1, div_y + 1, w2, h2, depth + 1);
-
-
-
+	CreateMaze_Div_Helper(x,         y,         w1, h1, depth + 1);
+	CreateMaze_Div_Helper(x,         div_y + 1, w2, h1, depth + 1);
+	CreateMaze_Div_Helper(div_x + 1, y,         w1, h2, depth + 1);
+	CreateMaze_Div_Helper(div_x + 1, div_y + 1, w2, h2, depth + 1);
 }
 
-void Maze::CreateMaze() {
-	// grid_ = init_grid(w_, h_, ' ');
-	
-	for (dim i = 0; i < h_; i++) {
-		grid_[i][0] = '#';
-		grid_[i][w_ - 1] = '#';
-	}
-	for (dim i = 0; i < w_; i++) {
-		grid_[0][i] = '#';
-		grid_[h_ - 1][i] = '#';
-	}
 
-	x_ = 0;
-	y_ = 1;
-	grid_[0][1] = ' ';
-	grid_[h_ - 1][w_ - 2] = ' ';
-
-	// recursive process
-	srand(time(NULL));
-	CreateMazeHelper(1, 1, w_ - 2,  h_ - 2, 65);
-}
-
-void Maze::Recreate() {
+void Maze::CreateMaze_BackTrack() {
+	srand(time(nullptr));
+	std::stack<std::pair<dim, dim>> st;
+	// fill with wall
 	for (dim i = 0; i < h_; i++)
 		for (dim j = 0; j < w_; j++)
-			grid_[i][j] = ' ';
-	CreateMaze();
+			grid_[i][j] = '#';
+
+	st.push(std::pair<dim,dim>(0, 0));
+
+	while (!st.empty()) {
+		auto p = st.top();
+		st.pop();
+		// random 
+		int x_off[4] = {1, -1, 0, 0};
+		int y_off[4] = {0, 0, 1, -1};
+		// remove wall?
+		int ct = 0;
+		for (int i = 0; i < 4; i++) {
+			if (isGood(p.first + x_off[i], p.second + y_off[i], ' '))
+				ct++;
+		}
+		if (ct <= 1) {
+			grid_[p.first][p.second] = ' ';
+		} else {
+			continue;
+		}
+
+		// shuffle order
+		for (int i = 0; i < 10; i++) {
+			int tar = 1 + rand() % 3;
+			int tmp;
+			
+			tmp = x_off[tar];
+			x_off[tar] = x_off[0];
+			x_off[0] = tmp;
+
+			tmp = y_off[tar];
+			y_off[tar] = y_off[0];
+			y_off[0] = tmp; 
+		}
+
+		// check 4 sides
+		for (int i = 0; i < 4; i++) {
+			std::cout << x_off[i] << ", " << y_off[i] << "\n";
+			// where to explore? should push this point?
+			if (!isGood(p.first + x_off[i], p.second + y_off[i], '#'))
+				continue;
+			// check already connected
+			int ct = 0;
+			for (int j = 0; j < 4; j++) {
+				if (isGood(p.first + x_off[i] + x_off[j],
+					p.second + y_off[i] + y_off[j], ' '))
+					ct++;
+			}
+			// explore!
+			std::cout << "total: " << ct << "\n";
+			if (ct <= 1)
+				st.push(std::pair<int, int>(p.first + x_off[i], p.second + y_off[i]));
+		}
+		// animation
+		std::cout << "\x1B[2J\x1B[H";
+		std::cout << *this;
+		usleep(20000);
+	}
+
 }
+
+
 
 
 

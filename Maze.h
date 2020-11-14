@@ -12,14 +12,16 @@ public:
 	Maze();
 	Maze(int width, int height);
 	~Maze();
+    virtual void Recreate();
     
     void MoveUp();
     void MoveDown();
     void MoveLeft();
     void MoveRight();
-    virtual void Recreate();
-    virtual void CreateMaze();
-	virtual void CreateMazeHelper(dim x, dim y, dim w, dim h, dim depth);
+    virtual void CreateMaze_Div();
+	virtual void CreateMaze_Div_Helper(dim x, dim y, dim w, dim h, dim depth);
+
+	virtual void CreateMaze_BackTrack();
 
     friend std::ostream &operator<<(std::ostream &out, const Maze &m);
 
@@ -31,7 +33,8 @@ private:
 	dim x_;
 	dim y_;
 
-	bool isGood(dim x, dim y);
+	// test if point x, y is goal, with bounds checking
+	bool isGood(dim x, dim y, char goal);
 
 };
 
