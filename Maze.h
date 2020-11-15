@@ -34,7 +34,8 @@ private:
 	dim y_;
 
 	// test if point x, y is goal, with bounds checking
-	bool isGood(dim x, dim y, char goal);
+	bool isTile(dim x, dim y, char goal);
+	void resetGrid(char tile);
 
 };
 

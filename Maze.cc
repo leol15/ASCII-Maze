@@ -55,9 +55,6 @@ Maze::~Maze() {
 
 
 void Maze::Recreate() {
-	for (dim i = 0; i < h_; i++)
-		for (dim j = 0; j < w_; j++)
-			grid_[i][j] = ' ';
 	CreateMaze_Div();
 }
 
@@ -78,36 +75,44 @@ std::ostream &operator<<(std::ostream &out, const Maze &m) {
 
 // actions 
 void Maze::MoveUp() {
-	if (!isGood(x_ - 1, y_, ' '))
+	if (!isTile(x_ - 1, y_, ' '))
 		return;
 	x_--;
 }
 void Maze::MoveDown() {
-	if (!isGood(x_ + 1, y_, ' '))
+	if (!isTile(x_ + 1, y_, ' '))
 		return;
 	x_++;
 }
 void Maze::MoveLeft() {
-	if (!isGood(x_, y_ - 1, ' '))
+	if (!isTile(x_, y_ - 1, ' '))
 		return;
 	y_--;
 }
 void Maze::MoveRight() {
-	if (!isGood(x_, y_ + 1, ' '))
+	if (!isTile(x_, y_ + 1, ' '))
 		return;
 	y_++;
 }
 
-bool Maze::isGood(dim x, dim y, char goal) {
+bool Maze::isTile(dim x, dim y, char goal) {
 	return x >= 0 && x < h_ && y >= 0 && y < w_
 		&& grid_[x][y] == goal;
 }
+
+void Maze::resetGrid(char tile) {
+	for (dim i = 0; i < h_; i++)
+		for (dim j = 0; j < w_; j++)
+			grid_[i][j] = tile;
+}
+
 
 
 // Maze Implementations
 
 // divde & conquer
 void Maze::CreateMaze_Div() {
+	resetGrid(' ');
 	for (dim i = 0; i < h_; i++) {
 		grid_[i][0] = '#';
 		grid_[i][w_ - 1] = '#';
@@ -200,61 +205,56 @@ void Maze::CreateMaze_Div_Helper(dim x, dim y, dim w, dim h, dim depth) {
 
 void Maze::CreateMaze_BackTrack() {
 	srand(time(nullptr));
-	std::stack<std::pair<dim, dim>> st;
 	// fill with wall
-	for (dim i = 0; i < h_; i++)
-		for (dim j = 0; j < w_; j++)
-			grid_[i][j] = '#';
-
+	resetGrid('#');
+	// stack
+	std::stack<std::pair<dim, dim>> st;
 	st.push(std::pair<dim,dim>(0, 0));
+	// random 
+	int x_off[4] = {1, -1, 0, 0};
+	int y_off[4] = {0, 0, 1, -1};
 
 	while (!st.empty()) {
 		auto p = st.top();
 		st.pop();
-		// random 
-		int x_off[4] = {1, -1, 0, 0};
-		int y_off[4] = {0, 0, 1, -1};
 		// remove wall?
 		int ct = 0;
 		for (int i = 0; i < 4; i++) {
-			if (isGood(p.first + x_off[i], p.second + y_off[i], ' '))
+			if (isTile(p.first + x_off[i], p.second + y_off[i], ' '))
 				ct++;
 		}
-		if (ct <= 1) {
-			grid_[p.first][p.second] = ' ';
-		} else {
+		// skip & dont remove block
+		if (ct > 1)
 			continue;
-		}
+
+		grid_[p.first][p.second] = ' ';
 
 		// shuffle order
 		for (int i = 0; i < 10; i++) {
-			int tar = 1 + rand() % 3;
-			int tmp;
+			int idx = 1 + rand() % 3, tmp;
 			
-			tmp = x_off[tar];
-			x_off[tar] = x_off[0];
+			tmp = x_off[idx];
+			x_off[idx] = x_off[0];
 			x_off[0] = tmp;
 
-			tmp = y_off[tar];
-			y_off[tar] = y_off[0];
+			tmp = y_off[idx];
+			y_off[idx] = y_off[0];
 			y_off[0] = tmp; 
 		}
 
 		// check 4 sides
 		for (int i = 0; i < 4; i++) {
-			std::cout << x_off[i] << ", " << y_off[i] << "\n";
 			// where to explore? should push this point?
-			if (!isGood(p.first + x_off[i], p.second + y_off[i], '#'))
+			if (!isTile(p.first + x_off[i], p.second + y_off[i], '#'))
 				continue;
-			// check already connected
+			// check empty space next to
 			int ct = 0;
 			for (int j = 0; j < 4; j++) {
-				if (isGood(p.first + x_off[i] + x_off[j],
+				if (isTile(p.first + x_off[i] + x_off[j],
 					p.second + y_off[i] + y_off[j], ' '))
 					ct++;
 			}
 			// explore!
-			std::cout << "total: " << ct << "\n";
 			if (ct <= 1)
 				st.push(std::pair<int, int>(p.first + x_off[i], p.second + y_off[i]));
 		}
