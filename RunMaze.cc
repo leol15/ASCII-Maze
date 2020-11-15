@@ -1,6 +1,7 @@
 
 #include <termios.h>
 #include <iostream>
+#include <ctime>
 
 #include "Maze.h"
 
@@ -22,12 +23,13 @@ int main(int argc, char const *argv[]) {
 	// for characters
 	disableInputBuffering();
 	// init maze
-	Maze maze(50, 30);
+	Maze maze(50, 25);
 	maze.CreateMaze_BackTrack();
 	// Maze maze;
 
 	char act;
 	// cout << "Start" << endl;
+	clock_t ti;
 	while (1) {
 		clear();
 		cout << maze;
@@ -48,8 +50,15 @@ int main(int argc, char const *argv[]) {
 			}
 		}
 		// actions
-		if (act == 'w' || act == 's' || act == 'a' || act == 'd')
+		if (act == 'w' || act == 's' || act == 'a' || act == 'd') {
+			if (time(nullptr) - ti < 1) {
+				// fast move
+				maze.Action(act);
+				maze.Action(act);
+			}
+			ti = time(nullptr);
 			maze.Action(act);
+		}
 		if (act == 'r')
 			maze.Recreate();
 		if (act == 'q')

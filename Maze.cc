@@ -206,7 +206,7 @@ void Maze::CreateMaze_BackTrack() {
 	resetGrid(WALL_);
 	// stack
 	std::stack<std::pair<int, int>> st;
-	st.push(std::pair<int,int>(0, 0));
+	st.push(std::pair<int,int>(1, 1));
 	// random 
 	int x_off[4] = {1, -1, 0, 0};
 	int y_off[4] = {0, 0, 1, -1};
@@ -215,6 +215,9 @@ void Maze::CreateMaze_BackTrack() {
 		auto p = st.top();
 		st.pop();
 		// remove wall?
+		if (p.first == 0 || p.second == 0
+			|| p.first == h_ - 1 || p.second == w_ - 1)
+			continue;
 		int ct = 0;
 		for (int i = 0; i < 4; i++) {
 			if (isTile(p.first + x_off[i], p.second + y_off[i], EMPTY_))
@@ -257,9 +260,15 @@ void Maze::CreateMaze_BackTrack() {
 		}
 		// animation
 		std::cout << "\x1B[2J\x1B[H";
-		std::cout << *this << std::flush;
-		usleep(50000);
+		std::cout << *this;
+		std::cout << std::flush;
+		usleep(10000);
 	}
+
+	// set up player position
+	x_ = 1;
+	y_ = 0;
+	grid_[x_][y_] = EMPTY_;
 
 }
 
