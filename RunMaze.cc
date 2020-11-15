@@ -22,17 +22,18 @@ int main(int argc, char const *argv[]) {
 	// for characters
 	disableInputBuffering();
 	// init maze
-	Maze maze(40, 30);
+	Maze maze(50, 30);
 	maze.CreateMaze_BackTrack();
 	// Maze maze;
 
 	char act;
 	// cout << "Start" << endl;
-	clear();
 	while (1) {
+		clear();
 		cout << maze;
 		cin >> act;
-		if ((act==27)) {
+		// arrow keys
+		if (act==27) {
 			cin >> act;
 			if (act == 91) {
 				cin >> act;
@@ -46,21 +47,15 @@ int main(int argc, char const *argv[]) {
 		        	act = 'a';
 			}
 		}
-		clear();
-		if (act == 'w')
-			maze.MoveUp();
-		if (act == 's')
-			maze.MoveDown();
-		if (act == 'a')
-			maze.MoveLeft();
-		if (act == 'd')
-			maze.MoveRight();
+		// actions
+		if (act == 'w' || act == 's' || act == 'a' || act == 'd')
+			maze.Action(act);
+		if (act == 'r')
+			maze.Recreate();
 		if (act == 'q')
 			break;
-		if (act == 'r') {
-			maze.Recreate();
-			clear();
-		}
 	}
+	clear();
 	return 0;
 }
+

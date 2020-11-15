@@ -5,7 +5,6 @@
 #include <ostream>
 #include <vector>
 
-typedef unsigned long dim;
 
 class Maze {
 public:
@@ -14,29 +13,30 @@ public:
 	~Maze();
     virtual void Recreate();
     
-    void MoveUp();
-    void MoveDown();
-    void MoveLeft();
-    void MoveRight();
+    void Action(char action);
+
     virtual void CreateMaze_Div();
-	virtual void CreateMaze_Div_Helper(dim x, dim y, dim w, dim h, dim depth);
+	virtual void CreateMaze_Div_Helper(int x, int y, int w, int h, int depth);
 
 	virtual void CreateMaze_BackTrack();
 
     friend std::ostream &operator<<(std::ostream &out, const Maze &m);
 
 private:
+	char WALL_ = 'X';
+	char EMPTY_ = ' ';
 	char ** grid_;
-	dim w_;
-	dim h_;
+	int w_;
+	int h_;
 
-	dim x_;
-	dim y_;
+	int x_;
+	int y_;
 
 	// test if point x, y is goal, with bounds checking
-	bool isTile(dim x, dim y, char goal);
+	bool isTile(int x, int y, char goal);
 	void resetGrid(char tile);
 
+    void MoveTo(int x, int y);
 };
 
 
