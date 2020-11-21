@@ -23,7 +23,7 @@ int main(int argc, char const *argv[]) {
 	// for characters
 	disableInputBuffering();
 	// init maze
-	Maze maze(50, 25);
+	Maze maze(30, 24);
 	maze.CreateMaze_BackTrack();
 	// Maze maze;
 

@@ -23,8 +23,8 @@ public:
     friend std::ostream &operator<<(std::ostream &out, const Maze &m);
 
 private:
-	char WALL_ = 'X';
-	char EMPTY_ = ' ';
+	char WALL_ = ' ';
+	char EMPTY_ = '-';
 	char ** grid_;
 	int w_;
 	int h_;
@@ -32,7 +32,7 @@ private:
 	int x_;
 	int y_;
 
-	// test if point x, y is goal, with bounds checking
+	// test if point x, y  is goal, with bounds checking
 	bool isTile(int x, int y, char goal);
 	void resetGrid(char tile);
 

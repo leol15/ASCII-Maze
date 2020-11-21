@@ -60,12 +60,15 @@ void Maze::Recreate() {
 
 std::ostream &operator<<(std::ostream &out, const Maze &m) {
 	// print the maze
+	srand(900);
 	for (int i = 0; i < m.h_; i++) {
 		for (int j = 0; j < m.w_; j++) {
 			if (i == m.x_ && j == m.y_) {
 				out << "\033[41m" << 'O' << "\033[m";
 			} else if (m.grid_[i][j] == m.WALL_) {
-				out << "\033[100m" << m.grid_[i][j] << "\033[m";
+				int val = 40 + rand() % 8;
+				out << "\033[" << val << "m" << m.grid_[i][j] << "\033[m";
+				// out << "\033[100m" << m.grid_[i][j] << "\033[m";
 			} else {
 				out << m.grid_[i][j];
 			}
