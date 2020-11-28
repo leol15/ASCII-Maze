@@ -60,6 +60,7 @@ void Maze::Recreate() {
 
 std::ostream &operator<<(std::ostream &out, const Maze &m) {
 	// print the maze
+	// affect future rand!!!
 	srand(900);
 	for (int i = 0; i < m.h_; i++) {
 		for (int j = 0; j < m.w_; j++) {
@@ -67,8 +68,10 @@ std::ostream &operator<<(std::ostream &out, const Maze &m) {
 				out << "\033[41m" << 'O' << "\033[m";
 			} else if (m.grid_[i][j] == m.WALL_) {
 				int val = 41 + rand() % 7;
-				out << "\033[" << val << "m" << m.grid_[i][j] << "\033[m";
-				// out << "\033[100m" << m.grid_[i][j] << "\033[m";
+				// out << "\033[" << val << "m" << m.grid_[i][j] << "\033[m";
+				out << "\033[100m" << m.grid_[i][j] << "\033[m";
+			} else if (m.grid_[i][j] == m.VISITED_) {
+				out << "\033[91m" << m.grid_[i][j] << "\033[m";				
 			} else {
 				out << m.grid_[i][j];
 			}
@@ -225,9 +228,9 @@ void Maze::CreateMaze_Div_Helper(int x, int y, int w, int h, int depth) {
 	usleep(100000);
 	// recurse
 	CreateMaze_Div_Helper(x,         y,         w1, h1, depth + 1);
-	CreateMaze_Div_Helper(div_x + 1, div_y + 1, w2, h2, depth + 1);
 	CreateMaze_Div_Helper(x,         div_y + 1, w2, h1, depth + 1);
 	CreateMaze_Div_Helper(div_x + 1, y,         w1, h2, depth + 1);
+	CreateMaze_Div_Helper(div_x + 1, div_y + 1, w2, h2, depth + 1);
 }
 
 
@@ -296,7 +299,7 @@ void Maze::CreateMaze_BackTrack() {
 		std::cout << "\x1B[2J\x1B[H";
 		std::cout << *this;
 		std::cout << std::flush;
-		usleep(10000);
+		usleep(5000);
 	}
 
 	// set up player position

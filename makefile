@@ -8,7 +8,7 @@ keys: keys.cc
 both: main run
 
 run: 
-	./runMaze
+	./runMaze 20 20
 
 main: Maze.o runMaze.o
 	g++ -Wall -g -o runMaze $^

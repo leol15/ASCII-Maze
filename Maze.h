@@ -26,6 +26,7 @@ private:
 	char WALL_ = ' ';
 	char EMPTY_ = '-';
 	char VISITED_ = '=';
+	
 	char ** grid_;
 	int w_;
 	int h_;

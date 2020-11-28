@@ -18,12 +18,26 @@ void clear() {
 	cout << "\x1B[2J\x1B[H";
 }
 
+void Usage(const char * progname) {
+	cerr << "Usage: " << progname << " width height" << endl;
+	exit(EXIT_FAILURE);
+}
+
 int main(int argc, char const *argv[]) {
 
+	if (argc < 3)
+		Usage(argv[0]);
+
+	int width = atoi(argv[1]);
+	int height = atoi(argv[2]);
+	if (width < 0 || height < 0)
+		Usage(argv[0]);
+	
 	// for characters
 	disableInputBuffering();
 	// init maze
-	Maze maze(22, 15);
+
+	Maze maze(width, height);
 	maze.CreateMaze_BackTrack();
 	// Maze maze;
 
@@ -60,7 +74,9 @@ int main(int argc, char const *argv[]) {
 			maze.Action(act);
 		}
 		if (act == 'r')
-			maze.Recreate();
+			maze.CreateMaze_Div();
+		if (act == 't')
+			maze.CreateMaze_BackTrack();
 		if (act == 'q')
 			break;
 	}
