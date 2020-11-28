@@ -91,8 +91,10 @@ void Maze::Action(char action) {
 }
 
 void Maze::MoveTo(int x, int y) {
-	if (isTile(x, y, EMPTY_))
+	if (isTile(x, y, EMPTY_) || isTile(x, y, VISITED_)) {
 		x_ = x, y_ = y;
+		grid_[x][y] = VISITED_;
+	}
 }
 
 
