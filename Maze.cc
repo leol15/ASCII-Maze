@@ -114,6 +114,7 @@ void Maze::resetGrid(char tile) {
 // divde & conquer
 void Maze::CreateMaze_Div() {
 	resetGrid(EMPTY_);
+	// boundaries
 	for (int i = 0; i < h_; i++) {
 		grid_[i][0] = WALL_;
 		grid_[i][w_ - 1] = WALL_;
@@ -122,6 +123,7 @@ void Maze::CreateMaze_Div() {
 		grid_[0][i] = WALL_;
 		grid_[h_ - 1][i] = WALL_;
 	}
+	// start position
 	x_ = 0, y_ = 1;
 	grid_[x_][y_] = EMPTY_;
 	grid_[h_ - 1][w_ - 2] = EMPTY_;
@@ -197,16 +199,21 @@ void Maze::CreateMaze_Div_Helper(int x, int y, int w, int h, int depth) {
 	}
 	// create holes
 	// make holes in the 4 partitions, using seg
-	for (int i : seg) {
+	for (int i = 0; i < 3; i++) {
 		// create holes
-		if (i == 0) {
-			grid_[div_x][div_y + 1 + (rand() % w2)] = EMPTY_;
-		} else if (i == 1) {
-			grid_[div_x][y + (rand() % w1)] = EMPTY_;
-		} else if (i == 2) {
-			grid_[x + rand() % h1][div_y] = EMPTY_;
-		} else {
-			grid_[div_x + 1 + rand() % h2][div_y] = EMPTY_;
+		switch (seg[i]) {
+			case 0:
+				grid_[div_x][div_y + 1 + (rand() % w2)] = EMPTY_;
+				break;
+			case 1:
+				grid_[div_x][y + (rand() % w1)] = EMPTY_;
+				break;
+			case 2:
+				grid_[x + rand() % h1][div_y] = EMPTY_;
+				break;
+			default:
+				grid_[div_x + 1 + rand() % h2][div_y] = EMPTY_;
+				break;
 		}
 	} 
 
