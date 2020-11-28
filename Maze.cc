@@ -66,7 +66,7 @@ std::ostream &operator<<(std::ostream &out, const Maze &m) {
 			if (i == m.x_ && j == m.y_) {
 				out << "\033[41m" << 'O' << "\033[m";
 			} else if (m.grid_[i][j] == m.WALL_) {
-				int val = 40 + rand() % 8;
+				int val = 41 + rand() % 7;
 				out << "\033[" << val << "m" << m.grid_[i][j] << "\033[m";
 				// out << "\033[100m" << m.grid_[i][j] << "\033[m";
 			} else {
@@ -237,6 +237,9 @@ void Maze::CreateMaze_BackTrack() {
 		auto p = st.top();
 		st.pop();
 		// remove wall?
+		// create exit!
+		if (p.first == h_ - 1 && p.second == w_ - 2)
+			grid_[p.first][p.second] = EMPTY_;
 		if (p.first == 0 || p.second == 0
 			|| p.first == h_ - 1 || p.second == w_ - 1)
 			continue;
@@ -292,6 +295,9 @@ void Maze::CreateMaze_BackTrack() {
 	y_ = 0;
 	grid_[x_][y_] = EMPTY_;
 
+	// create exit
+	// it was created in while loop!
+	// grid_[h_ - 1][w_ - 2] = EMPTY_;
 }
 
 
