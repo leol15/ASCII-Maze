@@ -185,11 +185,30 @@ void Maze::CreateMaze_Div_Helper(int x, int y, int w, int h, int depth) {
 	int w2 = w - w1 - 1;
 	int h1 = div_x - x;
 	int h2 = h - h1 - 1;
-	// create holes
 
-	grid_[div_x][div_y + 1 + (rand() % (w2))] = EMPTY_;
-	grid_[div_x][y + (rand() % w1)] = EMPTY_;
-	grid_[x + rand() % h1][div_y] = EMPTY_;
+	// could shuffle 4 numbers
+	int seg[] = {0, 1, 2, 3};
+	for (int i = 0; i < 10; i++) {
+		int idx = 1 + rand() % 3;
+		// swap seg[0] with seg[idx]
+		seg[0] += seg[idx];
+		seg[idx] = seg[0] - seg[idx];
+		seg[0] -= seg[idx];
+	}
+	// create holes
+	// make holes in the 4 partitions, using seg
+	for (int i : seg) {
+		// create holes
+		if (i == 0) {
+			grid_[div_x][div_y + 1 + (rand() % w2)] = EMPTY_;
+		} else if (i == 1) {
+			grid_[div_x][y + (rand() % w1)] = EMPTY_;
+		} else if (i == 2) {
+			grid_[x + rand() % h1][div_y] = EMPTY_;
+		} else {
+			grid_[div_x + 1 + rand() % h2][div_y] = EMPTY_;
+		}
+	} 
 
 	// animation
 	std::cout << "\x1B[2J\x1B[H";
